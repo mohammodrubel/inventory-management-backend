@@ -1,0 +1,344 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum WarehouseStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PurchaseStatus {
+  DRAFT
+  PENDING
+  RECEIVED
+  CANCELLED
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  REFUNDED
+}
+
+enum StockMovementType {
+  PURCHASE
+  SALE
+  ADJUSTMENT
+  TRANSFER_IN
+  TRANSFER_OUT
+  RETURN
+  DAMAGE
+  LOSS
+}
+
+enum UnitType {
+  PIECE
+  BOX
+  KG
+  GRAM
+  LITER
+  METER
+  SET
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  email     String?
+  phone     String?
+  address   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isUpdatePassword Boolean @default(false)
+  users        User[]
+  subscriptions Subscription[]
+  categories   Category[]
+  products     Product[]
+  suppliers    Supplier[]
+  warehouses   Warehouse[]
+  purchases    Purchase[]
+  orders       Order[]
+  stockMovements StockMovement[]
+}
+
+model User {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  email          String
+  password       String
+  role           Role     @default(EMPLOYEE)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  purchases      Purchase[]
+  orders         Order[]
+  stockMovements StockMovement[]
+
+  @@unique([organizationId, email])
+}
+
+model Subscription {
+  id             String             @id @default(cuid())
+  organizationId String
+  plan           String
+  status         SubscriptionStatus @default(ACTIVE)
+
+  startDate      DateTime
+  endDate        DateTime
+
+  billingYear    Int
+  billingMonth   Int
+
+  price          Decimal            @db.Decimal(12, 2)
+
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, billingYear, billingMonth])
+}
+
+model Category {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  products       Product[]
+
+  @@unique([organizationId, name])
+}
+
+model Product {
+  id             String        @id @default(cuid())
+  organizationId String
+  categoryId     String?
+
+  sku            String
+  name           String
+  description    String?
+
+  unit           UnitType      @default(PIECE)
+
+  costPrice      Decimal       @db.Decimal(12, 2)
+  sellingPrice   Decimal       @db.Decimal(12, 2)
+
+  minimumStock   Int           @default(0)
+  maximumStock   Int?
+
+  status         ProductStatus @default(ACTIVE)
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  category       Category?     @relation(fields: [categoryId], references: [id])
+
+  stocks         Stock[]
+  purchaseItems  PurchaseItem[]
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
+
+  @@unique([organizationId, sku])
+}
+
+model Supplier {
+  id             String       @id @default(cuid())
+  organizationId String
+
+  name           String
+  companyName    String?
+  email          String?
+  phone          String?
+  address        String?
+
+  isActive       Boolean      @default(true)
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  purchases      Purchase[]
+
+  @@unique([organizationId, name])
+}
+
+model Warehouse {
+  id             String          @id @default(cuid())
+  organizationId String
+
+  name           String
+  code           String
+  address        String?
+  description    String?
+
+  status         WarehouseStatus @default(ACTIVE)
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  stocks         Stock[]
+  stockMovements StockMovement[]
+
+  @@unique([organizationId, code])
+}
+
+model Stock {
+  id           String   @id @default(cuid())
+  productId    String
+  warehouseId  String
+
+  quantity     Int      @default(0)
+  reservedQty  Int      @default(0)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  product      Product  @relation(fields: [productId], references: [id])
+  warehouse    Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@unique([productId, warehouseId])
+}
+
+model Purchase {
+  id             String         @id @default(cuid())
+  organizationId String
+  supplierId     String?
+  createdById    String
+
+  invoiceNumber  String?
+  status         PurchaseStatus @default(DRAFT)
+
+  subtotal       Decimal        @db.Decimal(12, 2)
+  discount       Decimal        @default(0) @db.Decimal(12, 2)
+  tax            Decimal        @default(0) @db.Decimal(12, 2)
+  total          Decimal        @db.Decimal(12, 2)
+
+  purchaseDate   DateTime       @default(now())
+  note           String?
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  supplier       Supplier?      @relation(fields: [supplierId], references: [id])
+  createdBy      User           @relation(fields: [createdById], references: [id])
+
+  items          PurchaseItem[]
+}
+
+model PurchaseItem {
+  id          String   @id @default(cuid())
+  purchaseId  String
+  productId   String
+
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(12, 2)
+  total       Decimal  @db.Decimal(12, 2)
+
+  purchase    Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id             String        @id @default(cuid())
+  organizationId String
+  createdById    String?
+
+  orderNumber    String
+  status         OrderStatus   @default(DRAFT)
+  paymentStatus  PaymentStatus @default(PENDING)
+
+  subtotal       Decimal       @db.Decimal(12, 2)
+  discount       Decimal       @default(0) @db.Decimal(12, 2)
+  tax            Decimal       @default(0) @db.Decimal(12, 2)
+  total          Decimal       @db.Decimal(12, 2)
+
+  orderDate      DateTime      @default(now())
+  note           String?
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  createdBy      User?         @relation(fields: [createdById], references: [id])
+
+  items          OrderItem[]
+
+  @@unique([organizationId, orderNumber])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  productId   String
+
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(12, 2)
+  total       Decimal  @db.Decimal(12, 2)
+
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id])
+}
+
+model StockMovement {
+  id             String             @id @default(cuid())
+  organizationId String
+  productId      String
+  warehouseId    String
+  userId         String?
+
+  type           StockMovementType
+  quantity       Int
+
+  referenceId    String?
+  note           String?
+
+  createdAt      DateTime           @default(now())
+
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  product        Product            @relation(fields: [productId], references: [id])
+  warehouse      Warehouse          @relation(fields: [warehouseId], references: [id])
+  user           User?              @relation(fields: [userId], references: [id])
+}
