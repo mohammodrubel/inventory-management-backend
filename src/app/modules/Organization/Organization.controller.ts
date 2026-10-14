@@ -2,15 +2,7 @@ import catchAsync from "../../utils/catchAsync"
 import sendResponse from "../../utils/sendResponse"
 import { OrganizationService } from "./Organization.srvice"
 
-const createOrganization = catchAsync(async(req,res)=>{
-    const result = OrganizationService.createOrganization(req.body)
-    sendResponse(res,{
-        statusCode:200,
-        success:true,
-        message:"successfully create Organization",
-        data:result 
-    })
-})
+
 
 const getAllOrganization = catchAsync(async (req, res) => {
   const result = await OrganizationService.getAllOrganization(
@@ -37,7 +29,6 @@ const getSingleOrganization = catchAsync(async(req,res)=>{
 })
 
 export const OrganizationController = {
-    createOrganization,
     getAllOrganization,
     getSingleOrganization
 }

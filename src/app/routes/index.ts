@@ -2,6 +2,7 @@ import express from 'express';
 import { AuthRoutes } from '../modules/auth/auth.routes';
 import { userRouter } from '../modules/user/user.router';
 import { organizationRouter } from '../modules/Organization/Organization.router';
+import { subscriptionRouter } from '../modules/Subscription/Subscription.router';
 
 
 const router = express.Router();
@@ -23,6 +24,10 @@ const routes: Route[] = [
   {
     path:'/organization',
     route:organizationRouter
+  },
+  {
+    path:'/subscription',
+    route:subscriptionRouter
   }
 ];
 routes.forEach((route) => {

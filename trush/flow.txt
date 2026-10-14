@@ -1,0 +1,69 @@
+01. Organization
+Tenant setup, company details, organization isolation
+
+Foundation
+
+
+
+02. User & Authentication
+Registration, login, password hashing, JWT/session, roles
+
+
+
+
+03. Subscription
+Plan, billing period, expiry and access restrictions
+
+
+
+
+04. Category
+Product classification
+
+
+
+
+05. Product
+SKU, pricing, unit, minimum stock and category
+
+
+
+
+06. Supplier
+Supplier information for purchasing
+
+
+
+
+07. Warehouse
+Warehouse creation and management
+
+
+
+
+08. Stock
+Product quantity and reserved quantity per warehouse
+
+
+
+
+09. Purchase & PurchaseItem
+Purchase creation, supplier selection and receiving stock
+
+
+
+
+10. Order & OrderItem
+Sales orders, items, totals and payment status
+
+
+
+
+11. StockMovement
+Audit trail for purchases, sales, adjustments and transfers
+
+
+
+
+12. Dashboard & Reports
+Stock valuation, low-stock alerts, purchases, sales and summaries

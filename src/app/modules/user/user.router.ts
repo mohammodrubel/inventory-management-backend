@@ -4,7 +4,9 @@ import auth from '../../middlewares/auth';
 import { Role } from '@prisma/client';
 
 const router = Router();
-
+router.post('/',((req,res,next)=>{
+    next()
+}), auth(Role.SUPER_ADMIN), UserController.createOrganization);
 router.get('/', auth(Role.ADMIN), UserController.GetAllUsers);
 router.get('/profile',UserController.userProfile)
 router
