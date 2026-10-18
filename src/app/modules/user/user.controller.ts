@@ -46,7 +46,7 @@ const DeleteUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const createOrganization = catchAsync(async(req,res)=>{
-    const result = UserService.createOrganization(req.body)
+    const result =await UserService.createOrganization(req.body)
     sendResponse(res,{
         statusCode:200,
         success:true,

@@ -36,6 +36,7 @@ CREATE TABLE "Organization" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isUpdatePassword" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Organization_pkey" PRIMARY KEY ("id")
 );
@@ -58,13 +59,13 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "Subscription" (
     "id" TEXT NOT NULL,
-    "organizationId" TEXT NOT NULL,
+    "organizationId" TEXT,
     "plan" TEXT NOT NULL,
     "status" "SubscriptionStatus" NOT NULL DEFAULT 'ACTIVE',
-    "startDate" TIMESTAMP(3) NOT NULL,
-    "endDate" TIMESTAMP(3) NOT NULL,
-    "billingYear" INTEGER NOT NULL,
-    "billingMonth" INTEGER NOT NULL,
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
+    "billingYear" INTEGER,
+    "billingMonth" INTEGER,
     "price" DECIMAL(12,2) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -235,9 +236,6 @@ CREATE UNIQUE INDEX "Organization_slug_key" ON "Organization"("slug");
 CREATE UNIQUE INDEX "User_organizationId_email_key" ON "User"("organizationId", "email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Subscription_organizationId_billingYear_billingMonth_key" ON "Subscription"("organizationId", "billingYear", "billingMonth");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Category_organizationId_name_key" ON "Category"("organizationId", "name");
 
 -- CreateIndex
@@ -259,7 +257,7 @@ CREATE UNIQUE INDEX "Order_organizationId_orderNumber_key" ON "Order"("organizat
 ALTER TABLE "User" ADD CONSTRAINT "User_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Category" ADD CONSTRAINT "Category_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

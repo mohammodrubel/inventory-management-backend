@@ -5,7 +5,7 @@ const createSubscription = z.object({
     body: z.object({
         organizationId: z.string({
             required_error: "Organization ID is required",
-        }),
+        }).optional(),
 
         plan: z.string({
             required_error: "Subscription plan is required",

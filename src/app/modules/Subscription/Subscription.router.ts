@@ -9,7 +9,7 @@ import { SubscriptionValidation } from './Subscription.validation';
 const router = Router();
 
 router.post(
-    '/',
+    '/create-subscriptoin',
     auth(Role.SUPER_ADMIN),
     validateRequest(SubscriptionValidation.createSubscription),
     SubscriptionController.createSubscription
@@ -17,7 +17,7 @@ router.post(
 
 router.get(
     '/',
-    auth(Role.SUPER_ADMIN),
+    // auth(Role.SUPER_ADMIN),
     SubscriptionController.getAllSubscription
 );
 

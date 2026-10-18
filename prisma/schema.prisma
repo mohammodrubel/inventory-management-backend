@@ -115,24 +115,22 @@ model User {
 
 model Subscription {
   id             String             @id @default(cuid())
-  organizationId String
+  organizationId String?
   plan           String
   status         SubscriptionStatus @default(ACTIVE)
 
-  startDate      DateTime
-  endDate        DateTime
+  startDate      DateTime?
+  endDate        DateTime?
 
-  billingYear    Int
-  billingMonth   Int
+  billingYear    Int?
+  billingMonth   Int?
 
   price          Decimal            @db.Decimal(12, 2)
 
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
-  organization   Organization       @relation(fields: [organizationId], references: [id])
-
-  @@unique([organizationId, billingYear, billingMonth])
+  organization   Organization?      @relation(fields: [organizationId], references: [id])
 }
 
 model Category {

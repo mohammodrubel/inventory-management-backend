@@ -10,6 +10,7 @@ import { ILogin, IRegister } from './auth.interface';
 const Login = async (payload: ILogin) => {
   const user = await prisma.user.findFirst({
     where: { email: payload.email },
+    orderBy: { createdAt: 'desc' },
   });
 
   if (!user) {

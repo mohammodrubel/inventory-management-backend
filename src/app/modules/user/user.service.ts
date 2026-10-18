@@ -1,5 +1,7 @@
 import { Organization } from '@prisma/client';
 import prisma from '../../utils/prisma';
+import bcrypt from 'bcrypt';
+import config from '../../config';
 
 const GetAllUsers = async () => {
   const result = await prisma.user.findMany({});
@@ -42,6 +44,11 @@ const userProfile = async (id:string)=>{
 }
 
 const createOrganization = async (data: Organization) => {
+  const hashedPassword = await bcrypt.hash(
+    '123456',
+    Number(config.bcrypt_salt_rounds),
+  );
+
   const createOrganizationInfo = await prisma.organization.create({
     data: {
       name: data.name,
@@ -57,7 +64,7 @@ const createOrganization = async (data: Organization) => {
         create: {
           name: data.name,
           email: data.email!,
-          password: '123456',
+          password: hashedPassword,
           role: 'ADMIN',
         },
       },
